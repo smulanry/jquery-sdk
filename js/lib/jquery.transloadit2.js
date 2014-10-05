@@ -307,11 +307,15 @@
     // when the user hits cancel and so that we can .append(this.$files) to
     // this.$uploadForm, which moves (without a clone!) the file input fields in the dom
     this.$fileClones = $().not(document);
-    this.$files.each(function() {
-      var $clone = $(this).clone(true);
-      self.$fileClones = self.$fileClones.add($clone);
-      $clone.insertAfter(this);
-    });
+
+    // don't clone the fields if we are using the formData method and not showing the model window
+    if(!this._options.formData || this._options.modal) {
+        this.$files.each(function () {
+            var $clone = $(this).clone(true);
+            self.$fileClones = self.$fileClones.add($clone);
+            $clone.insertAfter(this);
+        });
+    }
 
     this.$iframe = $('<iframe id="transloadit-'+this.assemblyId+'" name="transloadit-'+this.assemblyId+'"/>')
       .appendTo('body')
@@ -321,6 +325,7 @@
 
     if (this._options.formData) {
       this._options.formData.append("params", this.$form.find("input[name=params]").val());
+      this._options.formData.append("signature", this.$form.find("input[name=signature]").val());
       var f = new XMLHttpRequest();
       f.open("POST", url);
       f.send(this._options.formData);
